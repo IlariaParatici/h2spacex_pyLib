@@ -53,6 +53,17 @@ class H2Connection:
         TODO
         :return:
         """
+        try:
+            self._create_raw_socket()
+            self._send_h2_connection_preface()  # send HTTP/2 Connection Preface
+            self._send_client_initial_settings_frame()  # send client initial settings frame to server
+        except Exception as e:
+            print('# Error in setting the connection up : ' + str(e))
+            exit(1)
+
+        else:
+            self.is_connection_closed = False
+
 
     def __thread_response_frame_parsing(self, _timeout=0.5):
         """
@@ -169,7 +180,7 @@ class H2Connection:
             except socket.timeout:
                 break
             response += data
-
+        # TODO: check if the response body is html and if it is, then format it well (not bytes)
         return response
 
     def old_parse_frames_bytes(self, frame_bytes, is_verbose=False):
@@ -412,7 +423,7 @@ class H2Connection:
         """
 
         if body:
-            body = bytes(body, 'utf-8')
+            body_bytes = bytes(body, 'utf-8')
 
         if check_headers_lowercase:
             headers_string = utils.make_header_names_small(headers_string)
@@ -424,7 +435,7 @@ class H2Connection:
             path=path,
             headers_string=headers_string,
             stream_id=stream_id,
-            body=body,
+            body=body_bytes,
         )
 
         self.send_bytes(bytes(request_frames))

@@ -56,12 +56,14 @@ class FrameParser:
         self.headers_table = h2.HPackHdrTable()
 
     def show_response_of_sent_requests(self):
+        output = ''
         for s_id in self.headers_and_data_frames.keys():
             headers = self.headers_and_data_frames[s_id]['header']
-            print(f'#-    Stream ID: {s_id}   -#')
+            print(f'\n#-    Stream ID: {s_id}   -#')
             print('-Headers-')
             print(headers)
             print('-Body-')
+            #TODO: if the body contains html content, it should be printed out formatted as html with the right newlines, not like it was bytes
             data = self.headers_and_data_frames[s_id]['data']
             if 'content-encoding: gzip' in headers:
                 data = decompress_gzip_data(data)
@@ -70,7 +72,12 @@ class FrameParser:
             elif 'content-encoding: deflate' in headers:
                 data = decompress_deflate_data(data)
 
-            print(str(data))
+            #print(str(data)) #original code
+            data_decoded = data.decode('utf-8')
+            output = output + f'\n#-    Stream ID: {s_id}   -#\n-Headers-\n{headers}\n-Body-\n{data_decoded}\n'
+            #print(data_decoded)
+            print(output)
+            #TODO: substitute the print with: return output
 
     def add_frames(self, frames_bytes: bytes, is_verbose=False):
         if frames_bytes:
