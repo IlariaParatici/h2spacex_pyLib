@@ -256,7 +256,7 @@ class H2Connection:
         self.last_used_stream_id = stream_ids_list[-1]
         return stream_ids_list
 
-    def create_single_packet_http2_post_request_frames(
+    def create_single_packet_http2_request_frames(
             self,
             authority,
             scheme,
@@ -294,67 +294,77 @@ class H2Connection:
             path=path,
             headers_string=headers_string,
             stream_id=stream_id,
-            body=body,
+            body=body, #body is by default None in this function
         )
-        last_byte = post_request_frames.frames[-1].data[-1:]
-        post_request_frames.frames[-1].data = post_request_frames.frames[-1].data[:-1]
-        post_request_frames.frames[-1].flags.remove('ES')
-        new_data_frame = h2.H2Frame(stream_id=stream_id, flags={'ES'}) / h2.H2DataFrame(data=last_byte)
+
+        if method == 'POST':
+            # save in last_byte the last byte of the last frame of the request
+            last_byte = post_request_frames.frames[-1].data[-1:]
+            # remove the last byte of data from the last frame of the request
+            post_request_frames.frames[-1].data = post_request_frames.frames[-1].data[:-1]
+            # remove the end stream flag from the last frame of the request
+            post_request_frames.frames[-1].flags.remove('ES')
+            # create a new data frame with the last byte of the last frame of the request and the end stream flag set
+            new_data_frame = h2.H2Frame(stream_id=stream_id, flags={'ES'}) / h2.H2DataFrame(data=last_byte)
+        else: #Method is GET
+            # TODO: See the commented method below and it's TODOs to see if it's necessary to use the Content Length header with value 1 and send a data frame with 1 casual byte of body (one casual letter)
+            post_request_frames.frames[-1].flags.remove('ES')
+            new_data_frame = h2.H2Frame(stream_id=stream_id, flags={'ES'}) / h2.H2DataFrame(data=b'')
 
         return post_request_frames, new_data_frame
 
-    def create_single_packet_http2_get_request_frames(
-            self,
-            authority,
-            scheme,
-            path,
-            headers_string,
-            stream_id,
-            check_headers_lowercase=True,
-            body=None,
-            method='GET',
-    ):
-        """
-        create simple http/2 GET request(Headers Frame + Null Data)
-        this function returns two variable, the first return variable is the request with body without the last byte,
-        and the second return variable is last frame with last byte
-        :param method: method of the request. e.g. GET
-        :param authority: equivalent of host header in http/1. e.g. google.com
-        :param scheme: http or https
-        :param path: request path. e.g. /index.html
-        :param headers_string: headers in request. split with \n --> user-agent: xxx\n
-        :param check_headers_lowercase: if this is True, the headers names will be checked to be lowercase
-        :param stream_id: stream id of the request
-        :param body: if the request method is not get, then it needs to have body
-        :return:
-        """
-        if body:
-            body = bytes(body, 'utf-8')
+    # def create_single_packet_http2_get_request_frames(
+    #         self,
+    #         authority,
+    #         scheme,
+    #         path,
+    #         headers_string,
+    #         stream_id,
+    #         check_headers_lowercase=True,
+    #         body=None,
+    #         method='GET',
+    # ):
+    #     """
+    #     create simple http/2 GET request(Headers Frame + Null Data)
+    #     this function returns two variable, the first return variable is the request with body without the last byte,
+    #     and the second return variable is last frame with last byte
+    #     :param method: method of the request. e.g. GET
+    #     :param authority: equivalent of host header in http/1. e.g. google.com
+    #     :param scheme: http or https
+    #     :param path: request path. e.g. /index.html
+    #     :param headers_string: headers in request. split with \n --> user-agent: xxx\n
+    #     :param check_headers_lowercase: if this is True, the headers names will be checked to be lowercase
+    #     :param stream_id: stream id of the request
+    #     :param body: if the request method is not get, then it needs to have body
+    #     :return:
+    #     """
+    #     if body:
+    #         body = bytes(body, 'utf-8')
 
-        if check_headers_lowercase:
-            headers_string = utils.make_header_names_small(headers_string)
+    #     if check_headers_lowercase:
+    #         headers_string = utils.make_header_names_small(headers_string)
 
-        # TODO: implement content-length: 1 method
-        # headers_string = headers_string.strip()
-        # headers_string += '\ncontent-length: 1\n'
+    #     # TODO: implement content-length: 1 method
+    #     # headers_string = headers_string.strip()
+    #     # headers_string += '\ncontent-length: 1\n'
 
-        headers_string = utils.make_header_names_small(headers_string)
+    #     headers_string = utils.make_header_names_small(headers_string)
 
-        get_request_frames = h2_frames.create_headers_frame(
-            method=method,
-            authority=authority,
-            scheme=scheme,
-            path=path,
-            headers_string=headers_string,
-            stream_id=stream_id,
-            body=None,
-        )
-        # TODO
-        # get_request_frames.frames[0].flags.remove('ES')
-        # continuation_frame = h2.H2Frame(stream_id=stream_id, flags={'EH'}) / h2.H2ContinuationFrame()
-        # new_data_frame = h2.H2Frame(stream_id=stream_id, flags={'ES'}) / h2.H2DataFrame(data=b'A')
+    #     get_request_frames = h2_frames.create_headers_frame(
+    #         method=method,
+    #         authority=authority,
+    #         scheme=scheme,
+    #         path=path,
+    #         headers_string=headers_string,
+    #         stream_id=stream_id,
+    #         body=None,
+    #     )
+    #     # TODO
+    #     # get_request_frames.frames[0].flags.remove('ES')
+    #     # continuation_frame = h2.H2Frame(stream_id=stream_id, flags={'EH'}) / h2.H2ContinuationFrame()
+    #     # new_data_frame = h2.H2Frame(stream_id=stream_id, flags={'ES'}) / h2.H2DataFrame(data=b'A')
 
-        return get_request_frames
+    #     return get_request_frames
 
     def create_simple_http2_request(
             self,

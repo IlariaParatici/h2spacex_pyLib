@@ -63,7 +63,7 @@ class FrameParser:
             print('-Headers-')
             print(headers)
             print('-Body-')
-            #TODO: if the body contains html content, it should be printed out formatted as html with the right newlines, not like it was bytes
+            #TODO: See if you want a string as output or a data structure that's more complex but easier to access and handle
             data = self.headers_and_data_frames[s_id]['data']
             if 'content-encoding: gzip' in headers:
                 data = decompress_gzip_data(data)
