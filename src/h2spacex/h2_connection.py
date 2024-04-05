@@ -244,12 +244,19 @@ class H2Connection:
         :return:
         """
 
+        if not isinstance(number_of_streams, int) or number_of_streams <= 0:
+            raise ValueError("number_of_streams must be a positive integer")
+
         if self.last_used_stream_id % 2 == 0:
             self.last_used_stream_id += 1
 
         start_stream_id = self.last_used_stream_id + 2
         end_stream_id = (number_of_streams * 2) + start_stream_id
         stream_ids_list = []
+
+        if end_stream_id <= start_stream_id:
+            raise ValueError("There's a problem with the stream_id range. Please check the number_of_streams value.")
+
         for i in range(start_stream_id, end_stream_id, 2):
             stream_ids_list.append(i)
 
