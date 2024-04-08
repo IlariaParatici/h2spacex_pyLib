@@ -79,6 +79,9 @@ class FrameParser:
             print(output)
             #TODO: substitute the print with: return output
 
+    def clear_response_of_sent_requests(self):
+        self.headers_and_data_frames = {}
+
     def add_frames(self, frames_bytes: bytes, is_verbose=False):
         if frames_bytes:
             parsed_frames = h2.H2Seq(frames_bytes).frames

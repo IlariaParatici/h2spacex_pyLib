@@ -245,7 +245,7 @@ class H2Connection:
         """
 
         if not isinstance(number_of_streams, int) or number_of_streams <= 0:
-            print(f"The number of streams passed to the function is: {number_of_streams}")
+            print(f"The number of streams passed to the function generate_stream_ids is: {number_of_streams}")
             raise ValueError("number_of_streams must be a positive integer")
 
         if self.last_used_stream_id % 2 == 0:
