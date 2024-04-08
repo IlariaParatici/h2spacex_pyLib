@@ -295,6 +295,11 @@ class H2Connection:
         if check_headers_lowercase:
             headers_string = utils.make_header_names_small(headers_string)
 
+        if method == 'GET':
+            headers_string = headers_string.strip()
+            if 'content-length:' not in headers_string:
+                headers_string += '\ncontent-length: 1\n'
+
         post_request_frames = h2_frames.create_headers_frame(
             method=method,
             authority=authority,
@@ -305,7 +310,7 @@ class H2Connection:
             body=body, #body is by default None in this function
         )
 
-        if method == 'POST':
+        if method == 'POST' or (method == 'GET' and body != None):
             # save in last_byte the last byte of the last frame of the request
             last_byte = post_request_frames.frames[-1].data[-1:]
             # remove the last byte of data from the last frame of the request
@@ -314,11 +319,11 @@ class H2Connection:
             post_request_frames.frames[-1].flags.remove('ES')
             # create a new data frame with the last byte of the last frame of the request and the end stream flag set
             new_data_frame = h2.H2Frame(stream_id=stream_id, flags={'ES'}) / h2.H2DataFrame(data=last_byte)
-        else: #Method is GET
+        else: #Method is GET and body is None
             # TODO: See the commented method below and it's TODOs to see if it's necessary to use the Content Length header with value 1 and send a data frame with 1 casual byte of body (one casual letter)
+            # and try to understand why the ES flag is removed from the first frame of the request and not from the last in his TODOs.
             post_request_frames.frames[-1].flags.remove('ES')
-            new_data_frame = h2.H2Frame(stream_id=stream_id, flags={'ES'}) / h2.H2DataFrame(data=b'')
-
+            new_data_frame = h2.H2Frame(stream_id=stream_id, flags={'ES'}) / h2.H2DataFrame(data=b'A')
         return post_request_frames, new_data_frame
 
     # def create_single_packet_http2_get_request_frames(
