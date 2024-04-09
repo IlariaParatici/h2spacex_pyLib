@@ -295,10 +295,6 @@ class H2Connection:
         if check_headers_lowercase:
             headers_string = utils.make_header_names_small(headers_string)
 
-        if method == 'GET':
-            headers_string = headers_string.strip()
-            if 'content-length:' not in headers_string:
-                headers_string += '\ncontent-length: 1\n'
 
         post_request_frames = h2_frames.create_headers_frame(
             method=method,
@@ -323,7 +319,10 @@ class H2Connection:
             # TODO: See the commented method below and it's TODOs to see if it's necessary to use the Content Length header with value 1 and send a data frame with 1 casual byte of body (one casual letter)
             # and try to understand why the ES flag is removed from the first frame of the request and not from the last in his TODOs.
             post_request_frames.frames[-1].flags.remove('ES')
-            new_data_frame = h2.H2Frame(stream_id=stream_id, flags={'ES'}) / h2.H2DataFrame(data=b'A')
+            #post_request_frames.frames[-1].flags.remove('EH')
+            new_data_frame = h2.H2Frame(stream_id=stream_id, flags={'ES'}) / h2.H2DataFrame(data=b'')
+            #continuation_frame = h2.H2Frame(stream_id=stream_id, flags={'EH'}) / h2.H2ContinuationFrame() #EH = End Headers
+
         return post_request_frames, new_data_frame
 
     # def create_single_packet_http2_get_request_frames(
@@ -374,7 +373,7 @@ class H2Connection:
     #     )
     #     # TODO
     #     # get_request_frames.frames[0].flags.remove('ES')
-    #     # continuation_frame = h2.H2Frame(stream_id=stream_id, flags={'EH'}) / h2.H2ContinuationFrame()
+    #     # continuation_frame = h2.H2Frame(stream_id=stream_id, flags={'EH'}) / h2.H2ContinuationFrame() #EH = End Headers
     #     # new_data_frame = h2.H2Frame(stream_id=stream_id, flags={'ES'}) / h2.H2DataFrame(data=b'A')
 
     #     return get_request_frames

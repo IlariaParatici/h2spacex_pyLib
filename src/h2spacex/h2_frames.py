@@ -77,7 +77,7 @@ class FrameParser:
             output = output + f'\n#-    Stream ID: {s_id}   -#\n-Headers-\n{headers}\n-Body-\n{data_decoded}\n'
             #print(data_decoded)
             print(output)
-            #TODO: substitute the print with: return output
+            return output
 
 
     def add_frames(self, frames_bytes: bytes, is_verbose=False):
