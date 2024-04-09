@@ -59,10 +59,6 @@ class FrameParser:
         output = ''
         for s_id in self.headers_and_data_frames.keys():
             headers = self.headers_and_data_frames[s_id]['header']
-            print(f'\n#-    Stream ID: {s_id}   -#')
-            print('-Headers-')
-            print(headers)
-            print('-Body-')
             #TODO: See if you want a string as output or a data structure that's more complex but easier to access and handle
             data = self.headers_and_data_frames[s_id]['data']
             if 'content-encoding: gzip' in headers:
@@ -76,8 +72,8 @@ class FrameParser:
             data_decoded = data.decode('utf-8')
             output = output + f'\n#-    Stream ID: {s_id}   -#\n-Headers-\n{headers}\n-Body-\n{data_decoded}\n'
             #print(data_decoded)
-            print(output)
-            return output
+        print(output)
+        return output
 
 
     def add_frames(self, frames_bytes: bytes, is_verbose=False):
