@@ -7,6 +7,7 @@ import scapy.contrib.http2 as h2
 from scapy.all import hex_bytes
 from . import h2_frames, utils
 import socks
+import datetime
 
 
 class H2Connection:
@@ -140,7 +141,9 @@ class H2Connection:
         """
         using_socket = self.get_using_socket()
         try:
+            sending_request_time = datetime.datetime.now()
             using_socket.send(bytes_data)
+            return sending_request_time
         except Exception as e:
             print('# Error in sending bytes: ' + str(e))
 
@@ -175,13 +178,14 @@ class H2Connection:
         while True:
             try:
                 data = using_socket.recv(4096)
+                time_received_response = datetime.datetime.now()
                 if not data:
                     break
             except socket.timeout:
                 break
             response += data
         # TODO: check if the response body is html and if it is, then format it well (not bytes)
-        return response
+        return response, time_received_response
 
     def old_parse_frames_bytes(self, frame_bytes, is_verbose=False):
         """
