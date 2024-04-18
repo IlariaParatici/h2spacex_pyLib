@@ -55,8 +55,9 @@ class FrameParser:
         self.h2_connection = h2_connection
         self.headers_table = h2.HPackHdrTable()
 
-    def show_response_of_sent_requests(self):
-        output = ''
+    def get_response_of_sent_requests(self):
+        outputString = ''
+        outputResponses = []
         for s_id in self.headers_and_data_frames.keys():
             headers = self.headers_and_data_frames[s_id]['header']
             #TODO: See if you want a string as output or a data structure that's more complex but easier to access and handle
@@ -70,10 +71,19 @@ class FrameParser:
 
             #print(str(data)) #original code
             data_decoded = data.decode('utf-8')
-            output = output + f'\n#-    Stream ID: {s_id}   -#\n-Headers-\n{headers}\n-Body-\n{data_decoded}\n'
-            #print(data_decoded)
-        print(output)
-        return output
+
+            status_code = None
+            content_length = None
+            for line in headers.splitlines():
+                if line.startswith(':status'):
+                    status_code = line.split(' ')[1]
+                elif line.startswith('content-length'):
+                    content_length = line.split(' ')[1]
+
+            outputResponses.append({'stream_id': s_id, 'status_code': status_code, 'content_length': content_length, 'headers': headers, 'data': data_decoded})
+            outputString = outputString + f'\n#-    Stream ID: {s_id}   -#\n-Headers-\n{headers}\n-Body-\n{data_decoded}\n'
+        print(outputString)
+        return outputString, outputResponses
 
 
     def add_frames(self, frames_bytes: bytes, is_verbose=False):
