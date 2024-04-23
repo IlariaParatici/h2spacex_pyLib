@@ -101,7 +101,7 @@ h2_conn.send_bytes(temp_data_bytes)
 resp = h2_conn.read_response_from_socket(_timeout=3)
 frame_parser = h2_frames.FrameParser(h2_connection=h2_conn)
 frame_parser.add_frames(resp)
-frame_parser.show_response_of_sent_requests()
+frame_parser.get_response_of_sent_requests()
 
 print('---')
 

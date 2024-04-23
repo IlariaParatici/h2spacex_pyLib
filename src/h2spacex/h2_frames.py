@@ -56,6 +56,7 @@ class FrameParser:
         self.headers_table = h2.HPackHdrTable()
 
     def get_response_of_sent_requests(self):
+        #Returns in output the string of the responses and a list of dictionaries with the response data
         outputString = ''
         outputResponses = []
         for s_id in self.headers_and_data_frames.keys():
@@ -80,7 +81,13 @@ class FrameParser:
                 elif line.startswith('content-length'):
                     content_length = line.split(' ')[1]
 
-            outputResponses.append({'stream_id': s_id, 'status_code': status_code, 'content_length': content_length, 'headers': headers, 'data': data_decoded})
+            headers_dict = {}
+            for line in headers.splitlines():
+                if ':' in line:
+                    header_name, header_value = line.split(':', 1)
+                    headers_dict[header_name.strip()] = header_value.strip()
+            outputResponses.append({'stream_id': s_id, 'status_code': status_code, 'content_length': content_length, 'headers': headers_dict, 'data': data_decoded})
+
             outputString = outputString + f'\n#-    Stream ID: {s_id}   -#\n-Headers-\n{headers}\n-Body-\n{data_decoded}\n'
         print(outputString)
         return outputString, outputResponses
