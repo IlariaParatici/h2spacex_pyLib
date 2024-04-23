@@ -85,7 +85,7 @@ class FrameParser:
             for line in headers.splitlines():
                 if line.startswith(':status'):
                     headers_dict['status'] = line.split(' ')[1]
-                if ':' in line:
+                elif ':' in line:
                     header_name, header_value = line.split(':', 1)
                     headers_dict[header_name.strip()] = header_value.strip()
             outputResponses.append({'stream_id': s_id, 'status_code': status_code, 'content_length': content_length, 'headers': headers_dict, 'body': data_decoded})
