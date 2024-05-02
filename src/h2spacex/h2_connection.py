@@ -182,6 +182,7 @@ class H2Connection:
                 if not data:
                     break
             except socket.timeout:
+                time_received_response = None
                 break
             response += data
         # TODO: check if the response body is html and if it is, then format it well (not bytes)
