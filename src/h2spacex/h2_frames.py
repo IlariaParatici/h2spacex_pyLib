@@ -75,11 +75,17 @@ class FrameParser:
 
             status_code = None
             content_length = None
+            new_headers_lines = []
             for line in headers.splitlines():
                 if line.startswith(':status'):
                     status_code = line.split(' ')[1]
+                    continue  # Skip adding this line to new_headers_lines
                 elif line.startswith('content-length'):
                     content_length = line.split(' ')[1]
+                new_headers_lines.append(line)
+
+            # Create a new headers string without the :status line
+            headers = '\n'.join(new_headers_lines)
 
             headers_dict = {}
             for line in headers.splitlines():
@@ -90,7 +96,7 @@ class FrameParser:
                     headers_dict[header_name.strip()] = header_value.strip()
             outputResponses.append({'stream_id': s_id, 'status_code': status_code, 'content_length': content_length, 'headers': headers_dict, 'body': data_decoded})
 
-            outputString = outputString + f'\n#-    Stream ID: {s_id}   -#\n-Headers-\n{headers}\n-Body-\n{data_decoded}\n'
+            outputString = outputString + f'\n#-    Stream ID: {s_id}   -#\n-Headers-\nstatus: {status_code}\n{headers}\n-Body-\n{data_decoded}\n'
         print(outputString)
         return outputString, outputResponses
 

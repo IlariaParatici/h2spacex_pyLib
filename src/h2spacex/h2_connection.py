@@ -311,7 +311,7 @@ class H2Connection:
             body=body, #body is by default None in this function
         )
 
-        if method == 'POST' or (method == 'GET' and body != None):
+        if body != None:
             # save in last_byte the last byte of the last frame of the request
             last_byte = post_request_frames.frames[-1].data[-1:]
             # remove the last byte of data from the last frame of the request
