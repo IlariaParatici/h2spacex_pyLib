@@ -175,19 +175,21 @@ class H2Connection:
             return b''
 
         response = b''
-        time_received_response = []
+        #TODO: problem: there are more time_received_response than response returned
+        # time_received_response = []
         while True:
             try:
                 data = using_socket.recv(4096)
-                time_received_response.append(datetime.datetime.now())
+                # time_received_response.append(datetime.datetime.now())
                 if not data:
                     break
             except socket.timeout:
-                time_received_response.append(None)
+                # time_received_response.append(None)
                 break
             response += data
         # TODO: check if the response body is html and if it is, then format it well (not bytes)
-        return response, time_received_response
+        # return response, time_received_response
+        return response
 
     def old_parse_frames_bytes(self, frame_bytes, is_verbose=False):
         """
