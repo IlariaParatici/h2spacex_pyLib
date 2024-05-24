@@ -175,14 +175,15 @@ class H2Connection:
             return b''
 
         response = b''
+        time_received_response = []
         while True:
             try:
                 data = using_socket.recv(4096)
-                time_received_response = datetime.datetime.now()
+                time_received_response.append(datetime.datetime.now())
                 if not data:
                     break
             except socket.timeout:
-                time_received_response = None
+                time_received_response.append(None)
                 break
             response += data
         # TODO: check if the response body is html and if it is, then format it well (not bytes)
@@ -301,7 +302,7 @@ class H2Connection:
             headers_string = utils.make_header_names_small(headers_string)
 
 
-        post_request_frames = h2_frames.create_headers_frame(
+        request_frames = h2_frames.create_headers_frame(
             method=method,
             authority=authority,
             scheme=scheme,
@@ -313,22 +314,22 @@ class H2Connection:
 
         if body != None:
             # save in last_byte the last byte of the last frame of the request
-            last_byte = post_request_frames.frames[-1].data[-1:]
+            last_byte = request_frames.frames[-1].data[-1:]
             # remove the last byte of data from the last frame of the request
-            post_request_frames.frames[-1].data = post_request_frames.frames[-1].data[:-1]
+            request_frames.frames[-1].data = request_frames.frames[-1].data[:-1]
             # remove the end stream flag from the last frame of the request
-            post_request_frames.frames[-1].flags.remove('ES')
+            request_frames.frames[-1].flags.remove('ES')
             # create a new data frame with the last byte of the last frame of the request and the end stream flag set
             new_data_frame = h2.H2Frame(stream_id=stream_id, flags={'ES'}) / h2.H2DataFrame(data=last_byte)
-        else: #Method is GET and body is None
+        else: #if body is None (GET requests for example)
             # TODO: See the commented method below and it's TODOs to see if it's necessary to use the Content Length header with value 1 and send a data frame with 1 casual byte of body (one casual letter)
             # and try to understand why the ES flag is removed from the first frame of the request and not from the last in his TODOs.
-            post_request_frames.frames[-1].flags.remove('ES')
-            #post_request_frames.frames[-1].flags.remove('EH')
+            request_frames.frames[-1].flags.remove('ES')
+            #request_frames.frames[-1].flags.remove('EH')
             new_data_frame = h2.H2Frame(stream_id=stream_id, flags={'ES'}) / h2.H2DataFrame(data=b'')
             #continuation_frame = h2.H2Frame(stream_id=stream_id, flags={'EH'}) / h2.H2ContinuationFrame() #EH = End Headers
 
-        return post_request_frames, new_data_frame
+        return request_frames, new_data_frame
 
     # def create_single_packet_http2_get_request_frames(
     #         self,
