@@ -178,7 +178,7 @@ class H2Connection:
 
         response = b''
         #TODO: problem: there are more time_received_response than response returned
-        conn = HyperH2Connection(client_side=False)
+        conn = HyperH2Connection()
         response = b''
         time_received_response = []
         while True:
