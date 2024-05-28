@@ -188,6 +188,7 @@ class H2Connection:
             response += data
             http2 = h2.H2Seq(data)
             parser = FrameParser()
+            body_present = False
             for frame in http2.frames:
                 if hasattr(frame, 'flags'):
                     print(frame.flags)
