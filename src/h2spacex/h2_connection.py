@@ -187,6 +187,7 @@ class H2Connection:
             response += data
             http2 = h2.H2Seq(data)
             for frame in http2.frames:
+                print(frame.flags)
                 if frame.flags.ES:
                     time_received_response.append(receiving_time)
         return response, time_received_response
