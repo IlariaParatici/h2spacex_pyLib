@@ -6,7 +6,7 @@ from threading import Thread
 import scapy.contrib.http2 as h2
 from scapy.all import hex_bytes
 from . import h2_frames, utils
-from h2_frames import FrameParser
+from .h2_frames import FrameParser
 import socks
 import datetime
 
