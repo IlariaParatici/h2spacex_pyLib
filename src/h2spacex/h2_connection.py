@@ -3,7 +3,7 @@ HTTP/2 Connection
 """
 import socket
 from threading import Thread
-from h2.connection import H2Connection
+from h2.connection import H2Connection as HyperH2Connection
 from h2.events import DataReceived, StreamEnded
 import scapy.contrib.http2 as sh2
 from scapy.all import hex_bytes
@@ -178,7 +178,7 @@ class H2Connection:
 
         response = b''
         #TODO: problem: there are more time_received_response than response returned
-        conn = H2Connection(client_side=False)
+        conn = HyperH2Connection(client_side=False)
         response = b''
         time_received_response = []
         while True:
