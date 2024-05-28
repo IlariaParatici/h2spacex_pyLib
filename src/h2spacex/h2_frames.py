@@ -55,11 +55,11 @@ class FrameParser:
         self.h2_connection = h2_connection
         self.headers_table = h2.HPackHdrTable()
 
-    def get_response_of_sent_requests(self):
+    def get_response_of_sent_requests(self,times=None):
         #Returns in output the string of the responses and a list of dictionaries with the response data
         outputString = ''
         outputResponses = []
-        for s_id in self.headers_and_data_frames.keys():
+        for index, s_id in enumerate(self.headers_and_data_frames.keys()):
             headers = self.headers_and_data_frames[s_id]['header']
             #TODO: See if you want a string as output or a data structure that's more complex but easier to access and handle
             data = self.headers_and_data_frames[s_id]['data']
@@ -94,8 +94,10 @@ class FrameParser:
                 elif ':' in line:
                     header_name, header_value = line.split(':', 1)
                     headers_dict[header_name.strip()] = header_value.strip()
-            outputResponses.append({'stream_id': s_id, 'status_code': status_code, 'content_length': content_length, 'headers': headers_dict, 'body': data_decoded})
-
+            if times is not None and len(times) > index:
+                outputResponses.append({'stream_id': s_id, 'status_code': status_code, 'response_time': times[index], 'content_length': content_length, 'headers': headers_dict, 'body': data_decoded})
+            else:
+                outputResponses.append({'stream_id': s_id, 'status_code': status_code, 'content_length': content_length, 'headers': headers_dict, 'body': data_decoded})
             outputString = outputString + f'\n#-    Stream ID: {s_id}   -#\n-Headers-\nstatus: {status_code}\n{headers}\n-Body-\n{data_decoded}\n'
         print(outputString)
         return outputString, outputResponses
