@@ -5,7 +5,7 @@ import socket
 from threading import Thread
 from h2.connection import H2Connection
 from h2.events import DataReceived, StreamEnded
-import scapy.contrib.http2 as h2
+import scapy.contrib.http2 as sh2
 from scapy.all import hex_bytes
 from . import h2_frames, utils
 import socks
@@ -251,7 +251,7 @@ class H2Connection:
         for s in self.DEFAULT_SETTINGS.keys():
             if self.DEFAULT_SETTINGS[s]['value'] is None:  # if value of the setting is None, then do not send it
                 continue
-            temp_s = h2.H2Setting(id=self.DEFAULT_SETTINGS[s]['id'], value=self.DEFAULT_SETTINGS[s]['value'])
+            temp_s = sh2.H2Setting(id=self.DEFAULT_SETTINGS[s]['id'], value=self.DEFAULT_SETTINGS[s]['value'])
             settings_list.append(temp_s)
 
         client_initial_settings_frame = h2_frames.create_settings_frame(settings=settings_list)
@@ -339,14 +339,14 @@ class H2Connection:
             # remove the end stream flag from the last frame of the request
             request_frames.frames[-1].flags.remove('ES')
             # create a new data frame with the last byte of the last frame of the request and the end stream flag set
-            new_data_frame = h2.H2Frame(stream_id=stream_id, flags={'ES'}) / h2.H2DataFrame(data=last_byte)
+            new_data_frame = sh2.H2Frame(stream_id=stream_id, flags={'ES'}) / sh2.H2DataFrame(data=last_byte)
         else: #if body is None (GET requests for example)
             # TODO: See the commented method below and it's TODOs to see if it's necessary to use the Content Length header with value 1 and send a data frame with 1 casual byte of body (one casual letter)
             # and try to understand why the ES flag is removed from the first frame of the request and not from the last in his TODOs.
             request_frames.frames[-1].flags.remove('ES')
             #request_frames.frames[-1].flags.remove('EH')
-            new_data_frame = h2.H2Frame(stream_id=stream_id, flags={'ES'}) / h2.H2DataFrame(data=b'')
-            #continuation_frame = h2.H2Frame(stream_id=stream_id, flags={'EH'}) / h2.H2ContinuationFrame() #EH = End Headers
+            new_data_frame = sh2.H2Frame(stream_id=stream_id, flags={'ES'}) / sh2.H2DataFrame(data=b'')
+            #continuation_frame = sh2.H2Frame(stream_id=stream_id, flags={'EH'}) / sh2.H2ContinuationFrame() #EH = End Headers
 
         return request_frames, new_data_frame
 
@@ -387,7 +387,7 @@ class H2Connection:
 
     #     headers_string = utils.make_header_names_small(headers_string)
 
-    #     get_request_frames = h2_frames.create_headers_frame(
+    #     get_request_frames = sh2_frames.create_headers_frame(
     #         method=method,
     #         authority=authority,
     #         scheme=scheme,
@@ -398,8 +398,8 @@ class H2Connection:
     #     )
     #     # TODO
     #     # get_request_frames.frames[0].flags.remove('ES')
-    #     # continuation_frame = h2.H2Frame(stream_id=stream_id, flags={'EH'}) / h2.H2ContinuationFrame() #EH = End Headers
-    #     # new_data_frame = h2.H2Frame(stream_id=stream_id, flags={'ES'}) / h2.H2DataFrame(data=b'A')
+    #     # continuation_frame = sh2.H2Frame(stream_id=stream_id, flags={'EH'}) / sh2.H2ContinuationFrame() #EH = End Headers
+    #     # new_data_frame = sh2.H2Frame(stream_id=stream_id, flags={'ES'}) / sh2.H2DataFrame(data=b'A')
 
     #     return get_request_frames
 
