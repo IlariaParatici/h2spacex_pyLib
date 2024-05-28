@@ -192,7 +192,7 @@ class H2Connection:
                     print(frame.flags)
                     if 'ES' in frame.flags:
                         time_received_response.append(receiving_time)
-                    elif 'EH' in frame.flags and b'content-length' not in frame.data.lower():
+                    elif 'EH' in frame.flags and b'content-length' not in frame.payload:
                         time_received_response.append(receiving_time)
         return response, time_received_response
         # # time_received_response = []
