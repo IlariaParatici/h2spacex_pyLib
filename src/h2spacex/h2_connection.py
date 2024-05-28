@@ -3,13 +3,13 @@ HTTP/2 Connection
 """
 import socket
 from threading import Thread
+from h2.connection import H2Connection
+from h2.events import DataReceived, StreamEnded
 import scapy.contrib.http2 as h2
 from scapy.all import hex_bytes
 from . import h2_frames, utils
 import socks
 import datetime
-from h2.connection import H2Connection
-from h2.events import DataReceived, StreamEnded
 
 
 class H2Connection:
