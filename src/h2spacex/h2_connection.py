@@ -187,9 +187,12 @@ class H2Connection:
             response += data
             http2 = h2.H2Seq(data)
             for frame in http2.frames:
-                if hasattr(frame, 'flags') and 'ES' in frame.flags:
+                if hasattr(frame, 'flags'):
                     print(frame.flags)
-                    time_received_response.append(receiving_time)
+                    if 'ES' in frame.flags:
+                        time_received_response.append(receiving_time)
+                    elif 'EH' in frame.flags and b'content-length' not in data.lower():
+                        time_received_response.append(receiving_time)
         return response, time_received_response
         # # time_received_response = []
         # while True:
