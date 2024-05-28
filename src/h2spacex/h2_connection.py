@@ -6,7 +6,6 @@ from threading import Thread
 import scapy.contrib.http2 as h2
 from scapy.all import hex_bytes
 from . import h2_frames, utils
-from .h2_frames import FrameParser
 import socks
 import datetime
 
@@ -187,23 +186,11 @@ class H2Connection:
                 break
             response += data
             http2 = h2.H2Seq(data)
-            parser = FrameParser()
-            body_present = False
             for frame in http2.frames:
-                if hasattr(frame, 'flags'):
+                if hasattr(frame, 'flags') and 'ES' in frame.flags:
                     print(frame.flags)
-                    headers_string = None
-                    if isinstance(frame.payload, h2.H2HeadersFrame):
-                        headers_string = parser.get_headers_string_from_headers_frame(frame)
-                        if 'content-length' in headers_string or 'Content-Length' in headers_string:
-                            body_present = True
-                    if body_present:
-                        if 'ES' in frame.flags:
-                            time_received_response.append(receiving_time)
-                            body_present = False
-                    elif 'EH' in frame.flags:
-                        time_received_response.append(receiving_time)
-            return response, time_received_response
+                    time_received_response.append(receiving_time)
+        return response, time_received_response
         # # time_received_response = []
         # while True:
         #     try:
