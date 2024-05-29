@@ -199,6 +199,8 @@ class H2Connection:
                             time_received_response.append(saved_time)
                         saved_time = receiving_time
                         headers_and_no_data = True
+                else:
+                    flags = []
             if 'EH' in flags:
                 time_received_response.append(saved_time)
         return response, time_received_response
