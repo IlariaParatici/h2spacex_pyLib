@@ -189,6 +189,7 @@ class H2Connection:
             headers_and_no_data = False
             for frame in http2.frames:
                 if hasattr(frame, 'flags'):
+                    flags = frame.flags
                     print(frame.flags)
                     if 'ES' in frame.flags:
                         headers_and_no_data = False
@@ -198,6 +199,8 @@ class H2Connection:
                             time_received_response.append(saved_time)
                         saved_time = receiving_time
                         headers_and_no_data = True
+            if 'EH' in flags:
+                time_received_response.append(saved_time)
         return response, time_received_response
         # # time_received_response = []
         # while True:
