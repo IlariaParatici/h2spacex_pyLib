@@ -197,6 +197,7 @@ class H2Connection:
                     elif 'EH' in frame.flags:
                         if headers_and_no_data:
                             time_received_response.append(saved_time)
+                            headers_and_no_data = False
                         saved_time = receiving_time
                         headers_and_no_data = True
             if 'EH' in flags:
