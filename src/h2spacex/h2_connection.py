@@ -188,6 +188,7 @@ class H2Connection:
             http2 = h2.H2Seq(data)
             headers_and_no_data = False
             for frame in http2.frames:
+                print(frame.show())
                 if hasattr(frame, 'flags'):
                     flags = frame.flags
                     print(frame.flags)
@@ -204,19 +205,6 @@ class H2Connection:
             if 'EH' in flags:
                 time_received_response.append(saved_time)
         return response, time_received_response
-        # # time_received_response = []
-        # while True:
-        #     try:
-        #         data = using_socket.recv(4096)
-        #         if not data:
-        #             break
-        #         # time_received_response.append(datetime.datetime.now())
-        #     except socket.timeout:
-        #         # time_received_response.append(None)
-        #         break
-        #     response += data
-        # # return response, time_received_response
-        # return response
 
     def old_parse_frames_bytes(self, frame_bytes, is_verbose=False):
         """
