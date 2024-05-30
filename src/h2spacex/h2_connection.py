@@ -203,9 +203,6 @@ class H2Connection:
                     flags = []
             if 'EH' in flags:
                 time_received_response.append(saved_time)
-            for frame in http2.frames:
-                print(frame.show())
-                print(' ')
         return response, time_received_response
 
     def old_parse_frames_bytes(self, frame_bytes, is_verbose=False):
